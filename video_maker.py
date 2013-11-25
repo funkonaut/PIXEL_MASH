@@ -28,8 +28,9 @@ fns = [ImageChops.difference, \
        lambda x, y: ImageChops.blend (x, y, .5)]
 
 names = ["pic" + str (x).zfill (5) + ".png" for x in range (1, frames + 1)]
-pngs = [Image.open (name) for name in names]
 f_names = ["img" + str (x).zfill (5) + ".png" for x in range (0, frames)]
+pngs = [Image.open (name) for name in names]
+
 for x in range (0, frames):
     reduce (fns[mashstyle], pngs [x : x + fmash]).save (f_names[x])
 
