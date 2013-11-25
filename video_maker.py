@@ -18,7 +18,7 @@ frames = rate*length+fmash
 command = ("ffmpeg -i %(file)s -ss %(time)s -vframes %(frames)d -r %(rate)s pic%%05d.png"%({"file": fn, "time": time,"frames": frames ,"rate": frate}))
 #experiment with video bit rate and qscale and what not...
 #get final file name from user input and create log for variables.......
-command2 = ("ffmpeg -qscale 1 -r %d -sameq -i img%%05d.png %s" %(rate,finalname))
+command2 = ("ffmpeg -r %d -i img%%05d.png %s" %(rate,finalname))
 subprocess.call(shlex.split(command))
 i = 1
 x = 1
@@ -53,7 +53,7 @@ while(x<frames):
             im=Image.open("pic%05d.png"%(i+x))
         i += 1
     if(not(x%(frames/4))):
-        print ("you are %%d done")%((100*(x/frames)))
+        print ("UGHHHHHHHHHHHHHH")
     im.save("img%05d.png"%x,"PNG")
     i = 1
     x += 1
@@ -61,7 +61,7 @@ while(x<frames):
 #delete those frames after processing yo
 i=1
 while(i<frames):
-    command = (['rm', 'pic%05d.png'%i]) 
+    command = (['rm', 'pic%05d.png'%i])
     try:
         subprocess.call(command)
     except:
