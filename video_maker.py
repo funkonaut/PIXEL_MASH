@@ -11,74 +11,30 @@ frate = int(raw_input("What rate do you want to grab frames to mash at: "))
 rate = int(raw_input("At what rate do you want your movie to play a (24 is a normal rate): "))
 time = raw_input("What time in the movie would you like to start hh:mm:ss: ")
 length = int(raw_input("How long do you want your video to be: "))
-mashstyle = int(raw_input("What mash style plese(1-diff,2-superimpose,3-invertblend,4-blend): "))
+mashstyle = int(raw_input("What mash style plese(1-diff,2-superimpose,3-invertblend,4-blend): ")) - 1
 finalname = raw_input("What do you want your final movie name to be: ")
-frames = rate*length+fmash
+frames = rate * length + fmash
 #do frame check make sure fmash
 command = ("ffmpeg -i %(file)s -ss %(time)s -vframes %(frames)d -r %(rate)s pic%%05d.png"%({"file": fn, "time": time,"frames": frames ,"rate": frate}))
 #experiment with video bit rate and qscale and what not...
 #get final file name from user input and create log for variables.......
-command2 = ("ffmpeg -r %d -i img%%05d.png %s" %(rate,finalname))
-subprocess.call(shlex.split(command))
-i = 1
-x = 1
-#
+command2 = ("ffmpeg -r %d -i img%%05d.png %s" %(rate, finalname))
+subprocess.call (shlex.split (command))
+
 #Mash those frames and save em sequentially....
-#
-#
-#
-#
-while(x<frames):
-    while(i<fmash):
-        if (not(i==1)):
-            try:
-                im1 = Image.open("pic%05d.png" %(i+x))
-            except:
-                break
-         #experiment with different combinations perhaps
-        # im1 = ImageChops.offset(5,0)
-            if(mashstyle == 1):
-                im = ImageChops.difference(im,im1)
-            elif(mashstyle == 2):
-                im = ImageChops.screen(im,im1)
-            elif(mashstyle == 3):
-                if((i & 1)== 1):               #makes sure that this works....
-                    im = ImageChops.invert(im1)
-                    im = ImageChops.blend(im,im1,.5)
-                else:
-                    im = ImageChops.blend(im,im1,.5)
-            elif(mashstyle == 4):
-                    im = ImageChops.blend(im,im1,.5)
-        else:
-            im=Image.open("pic%05d.png"%(i+x))
-        i += 1
-    if(not(x%(frames/4))):
-        print ("UGHHHHHHHHHHHHHH")
-    im.save("img%05d.png"%x,"PNG")
-    i = 1
-    x += 1
-#
-#delete those frames after processing yo
-i=1
-while(i<frames):
-    command = (['rm', 'pic%05d.png'%i])
-    try:
-        subprocess.call(command)
-    except:
-        break
-    i+=1
-#
+fns = [ImageChops.difference, \
+       ImageChops.screen, \
+       lambda x, y: ImageChops.blend (x, ImageChops.invert (y), .5), \
+       lambda x, y: ImageChops.blend (x, y, .5)]
+
+names = ["pic" + str (x).zfill (5) + ".png" for x in range (1, frames + 1)]
+pngs = [Image.open (name) for name in names]
+f_names = ["img" + str (x).zfill (5) + ".png" for x in range (0, frames)]
+for x in range (0, frames):
+    reduce (fns[mashstyle], pngs [x : x + fmash]).save (f_names[x])
+
 #call video maker!
-#
 subprocess.call(shlex.split(command2))
-#
-#delete pics/manipuated images now... maybe include in other while loop?
-#
-i=1
-while(i<frames-10):
-    command2 = (['rm', 'img%05d.png'%i])
-    try:
-        subprocess.call(command2)
-    except:
-        break
-    i += 1
+#delete pics/manipuated images
+for name in names + f_names:
+    subprocess.call (['rm', name])
