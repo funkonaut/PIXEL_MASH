@@ -1,10 +1,8 @@
-#Perhaps program it so it actually generates a video of the manipulated frames!
-#
-#
 import subprocess
 import shlex
-from vm_input import get_params
 from PIL import Image, ImageChops
+from vm_input import get_params
+from cache import retrieve
 
 (fn, fmash, frate, rate, time, length, mashstyle, finalname) = get_params ()
 frames = rate * length + fmash
@@ -22,10 +20,9 @@ fns = [ImageChops.difference, \
 
 names = ["pic" + str (x).zfill (5) + ".png" for x in range (1, frames + 1)]
 f_names = ["img" + str (x).zfill (5) + ".png" for x in range (0, frames)]
-pngs = [Image.open (name) for name in names]
 
 for x in range (0, frames):
-    reduce (fns[mashstyle], pngs [x : x + fmash]).save (f_names[x])
+    reduce (fns[mashstyle], map (retrieve, names [x : x + fmash])).save (f_names[x])
 
 #call video maker!
 subprocess.call(shlex.split(command2))
