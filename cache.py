@@ -4,7 +4,7 @@ cache_size = 10
 cache = OrderedDict ()
 def retrieve (key):
     if key in cache:
-        return Image.open (key)
+        return cache [key]
     else:
         cache[key] = Image.open (key)
         if (len (cache) > cache_size):
